@@ -1,33 +1,28 @@
 package Processor;
 
 public class ProcessorFactory {
+
     public static Processor getProcessor(String resource) {
-        Processor processor = new ErrorProcessor(null);                        //set new processor to errorproessor so it returns error as default
+        Processor processor = new ErrorProcessor(null);
         String endpoint;
         String queryString = null;
-        String endpointParts[] = resource.split("\\?");                       //split the endpoint so we get the query
+        String endpointParts[] = resource.split("\\?");
         endpoint = endpointParts[0];
-
-        if (endpointParts.length == 2) {                                            //if there is a query, set query string to it
+        if (endpointParts.length == 2) {
             queryString = endpointParts[1];
         }
 
         switch (endpoint) {
             case "/user":
-                processor = new UserProcessor(queryString);                         //return user if there is no error
+                processor = new UserProcessor(queryString);
                 break;
             case "/post":
                 processor = new PostProcessor(queryString);
                 break;
             default:
-                //add error code later?
+                //later add error code?
                 break;
-
         }
-
-
-        return processor;                                                           //returns error as default
-
+        return processor;
     }
-
 }

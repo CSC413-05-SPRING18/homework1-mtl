@@ -9,8 +9,8 @@ public class User implements iData {
     private static Map<String, User> userByUsername = new HashMap<>();
 
     private static User[] allUsers;
-    private static String username;
-    private static int userid;
+    private String username;
+    private int userid;
 
 
     public void register() {

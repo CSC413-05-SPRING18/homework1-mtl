@@ -68,8 +68,7 @@ class SimpleServer {
                     System.out.println("----------REQUEST START---------");
                     System.out.println(line);
 
-                    mainRequestLine = line;           //set mainRequestLine to line because we need the first line of the request "GET / HTTP/1.1
-
+                    mainRequestLine = line;                                                         //set mainRequestLine to line because we need the first line of the request "GET / HTTP/1.1
 
                     // read only headers
                     line = in.readLine();

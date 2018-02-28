@@ -4,15 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Post implements iData {
+
     private static Map<Integer, Post> postByID = new HashMap<Integer, Post>();
     private static Map<Integer, Post> postByUser = new HashMap<Integer, Post>();
     private static Map<Integer, String> contentByID = new HashMap<Integer, String>();
     private static Map<Integer, String> contentByUser = new HashMap<Integer, String>();
 
     private static Post[] allPosts;
-    private static int postid;
-    private static int userid;
-    private static String data;
+    private int postid;
+    private int userid;
+    private String data;
 
     public void Register() {
         postByID.put(this.postid, this);
