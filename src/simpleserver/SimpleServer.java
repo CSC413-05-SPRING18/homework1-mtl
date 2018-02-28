@@ -1,136 +1,120 @@
 package simpleserver;
 
+import DataModel.Post;
+import DataModel.User;
+import Processor.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import com.google.gson.*;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 
 class SimpleServer {
 
-  public static void main(String[] args) throws IOException {
-    ServerSocket ding;
-    Socket dong = null;
+    public static void main(String[] args) throws IOException {
+        ServerSocket ding;
+        Socket dong = null;
+        String resource = null;
+        String mainRequestLine = null;
+        User[] users;
+        Post[] posts;
 
-    String jsonString;
-    Gson gson = new Gson();
-    BufferedReader br;
-    JsonParser jsonParser;
-
-    String resource = null;
-    User[] userArray = null;        //array of users to store users read from GSON
-    Post[] postArray = null;        //array of posts to store posts read from GSON
-    User testUser = new User("Peter Lin", 1);
-
-
-    try {
-      ding = new ServerSocket(1299);
-      System.out.println("Opened socket " + 1299);
-      while (true) {
-
-
-
-        // keeps listening for new clients, one at a time
+        Gson gson = new Gson();
+        BufferedReader br;
         try {
-          dong = ding.accept(); // waits for client here
-        } catch (IOException e) {
-          System.out.println("Error opening socket");
-          System.exit(1);
-        }
+            br = new BufferedReader(new FileReader("src/data.json"));
+            JsonParser jsonParser = new JsonParser();
+            JsonObject obj = jsonParser.parse(br).getAsJsonObject();
 
-        InputStream stream = dong.getInputStream();
-        BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-        try {
+            users = gson.fromJson(obj.get("users"), User[].class);
+            posts = gson.fromJson(obj.get("posts"), Post[].class);
 
-          // read the first line to get the request method, URI and HTTP version
-          String line = in.readLine();
-          System.out.println("----------REQUEST START---------");
-          System.out.println(line);
-          // read only headers
-          line = in.readLine();
-          while (line != null && line.trim().length() > 0) {
-            int index = line.indexOf(": ");
-            if (index > 0) {
-              System.out.println(line);
-            } else {
-              break;
+            for (int i = 0; i < users.length; i++) {
+                users[i].register();
             }
-            line = in.readLine();
-          }
-          System.out.println("----------REQUEST END---------\n\n");
-        } catch (IOException e) {
-          System.out.println("Error reading");
-          System.exit(1);
-        }
-        BufferedOutputStream out = new BufferedOutputStream(dong.getOutputStream());
-        PrintWriter writer = new PrintWriter(out, true);  // char output to the client
+            User.setAll(users);
 
-        //read the data and put the user into appropriate tuples
-
-        try {
-          br = new BufferedReader(new FileReader("src/simpleserver/data.json"));
-          jsonParser = new JsonParser();
-          JsonObject obj = jsonParser.parse(br).getAsJsonObject();
-
-          userArray = gson.fromJson(obj.get("users"), User[].class);            //array of users
-          postArray = gson.fromJson(obj.get("posts"), Post[].class);            //array of posts
-          //User.setAll(userArray.length);
+            for (int i = 0; i < posts.length; i++) {
+                posts[i].Register();
+            }
+            Post.setAll(posts);
 
         } catch (FileNotFoundException e) {
-          e.printStackTrace();
+            System.exit(1);
         }
 
-        // every response will always have the status-line, date, and server name
-        writer.println("HTTP/1.1 200 OK");
-        writer.println("Server: TEST");
-        writer.println("Connection: close");
-        writer.println("Content-type: application/json");
-        writer.println("");
+
+        try {
+            ding = new ServerSocket(1299);
+            System.out.println("Opened socket " + 1299);
+            while (true) {
+
+                // keeps listening for new clients, one at a time
+                try {
+                    dong = ding.accept(); // waits for client here
+                } catch (IOException e) {
+                    System.out.println("Error opening socket");
+                    System.exit(1);
+                }
+
+                InputStream stream = dong.getInputStream();
+                BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+                try {
+
+                    // read the first line to get the request method, URI and HTTP version
+                    String line = in.readLine();
+                    System.out.println("----------REQUEST START---------");
+                    System.out.println(line);
+
+                    mainRequestLine = line;           //set mainRequestLine to line because we need the first line of the request "GET / HTTP/1.1
 
 
-        // Body of our response
-        // build the response then spit it out here
-        //responseBuilder rb = new responseBuilder();
+                    // read only headers
+                    line = in.readLine();
+                    while (line != null && line.trim().length() > 0) {
+                        int index = line.indexOf(": ");
+                        if (index > 0) {
+                            System.out.println(line);
+                        } else {
+                            break;
+                        }
+                        line = in.readLine();
+                    }
+                    System.out.println("----------REQUEST END---------\n\n");
+                } catch (IOException e) {
+                    System.out.println("Error reading");
+                    System.exit(1);
+                }
 
-          for(int i = 0; i < userArray.length; i++) {
-              jsonString = gson.toJson(userArray[i]);
-              writer.println(jsonString + ", \n");
-              writer.println(userArray[i].getUserID(0) + ", \n");
-          }
+                BufferedOutputStream out = new BufferedOutputStream(dong.getOutputStream());
+                PrintWriter writer = new PrintWriter(out, true);  // char output to the client
 
-         /* writer.println("{ status: 'OK',  \n");
-          writer.println("  data: \n");
-          writer.println("   [ ");
-          for(int i = 0; i < userArray.length; i++) {
-              jsonString = gson.toJson(userArray[i]);
-              if(i != userArray.length - 1) {
-                  writer.println("      " + jsonString + ", \n");
-              }
-              else{
-                  writer.println("      " + jsonString + " ], \n");
-              }
-              //writer.println(testUser.getUser(1) + ", \n");
-          }
-          writer.println("  entries: 7 }");*/
-/*
-          for(int i = 0; i < postArray.length; i++) {
-              jsonString = gson.toJson(postArray[i]);
-              writer.println(jsonString + ", \n");
-              writer.println(postArray[i].getPost(2)+ ", \n");
-          }
-*/
+                // every response will always have the status-line, date, and server name
+                writer.println("HTTP/1.1 200 OK");
+                writer.println("Server: TEST");
+                writer.println("Connection: close");
+                writer.println("Content-type: application/json");
+                writer.println("");
 
 
+                //do work here
+                String linePartsarray[] = mainRequestLine.split(" ");                   //split main request line into an array and put it into linePartsarray[];
+
+                String resourceString = linePartsarray[1];
+
+                Processor processor = ProcessorFactory.getProcessor(resourceString);          //put it into processor to get the right processor
 
 
-        dong.close();
-      }
-    } catch (IOException e) {
-      System.out.println("Error opening socket");
-      System.exit(1);
+                // Body of our response
+                writer.println(processor.process());
+
+                dong.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Error opening socket");
+            System.exit(1);
+        }
     }
-  }
 }
