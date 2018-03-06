@@ -3,7 +3,6 @@ package Processor;
 import DataModel.Response;
 import DataModel.ResponseBuilder;
 import DataModel.Post;
-import DataModel.User;
 import com.google.gson.Gson;
 
 public class PostProcessor extends Processor {

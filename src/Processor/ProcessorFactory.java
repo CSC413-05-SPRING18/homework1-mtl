@@ -16,7 +16,7 @@ public class ProcessorFactory {
             case "/user":
                 processor = new UserProcessor(queryString);
                 break;
-            case "/post":
+            case "/posts":
                 processor = new PostProcessor(queryString);
                 break;
             default:
